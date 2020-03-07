@@ -1,5 +1,6 @@
 #include "defines.h"
 #include "libretro.h"
+#include "libretro-defs.h"
 #include "tty.h"
 
 static int ar2 = 0, shift = 0, ctrl;

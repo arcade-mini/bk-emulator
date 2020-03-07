@@ -1,6 +1,7 @@
 #include "defines.h"
 #include "scr.h"
 #include "intl.h"
+#include "libretro-defs.h"
 
 #define HOR 512
 #define VERT 512
@@ -174,7 +175,6 @@ scr_refresh_bk0010(unsigned shift, unsigned full)
 	/* If more than a few lines changed, no point
 	 * doing separate UpdateRect's for each line.
 	 */
-	int update_all = blit_all || scr_dirty >= 4;
 	int nlines = full ? 256 : 64;
 	for (i = 0; i < nlines; i++) {
 		int line = (i + shift) & 0xFF;
@@ -201,8 +201,6 @@ scr_refresh_bk0011_2(unsigned shift, unsigned full) {
 	/* If more than a few lines changed, no point
 	 * doing separate UpdateRect's for each line.
 	 */
-	int update_all = blit_all || scr_dirty >= 4;
-	int do_palette = change_req || shift != cur_shift;
 	int nlines = full ? 512 : 128;
 	for (i = 0; i < nlines; i++) {
 		// The next line is the reverse mapping of vertbase

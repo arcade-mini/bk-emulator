@@ -180,8 +180,6 @@ static const enum inst itimtab[1024] = {
 
 void timing(register pdp_regs *p)
 {
-    int byteop = (p->ir & SIGN) && ((p->ir >> 12) != 016);
-    enum {defop, binop, unop, cmpop, tstop } optype = defop;
     enum inst code;
     code = itimtab[p->ir >> 6];
     switch (code) {

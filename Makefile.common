@@ -7,7 +7,7 @@ SOURCES_C := $(CORE_DIR)/access.c $(CORE_DIR)/boot.c $(CORE_DIR)/branch.c \
 	$(CORE_DIR)/tape.c $(CORE_DIR)/disk.c $(CORE_DIR)/mouse.c \
 	$(CORE_DIR)/single.c $(CORE_DIR)/weird.c $(CORE_DIR)/tty.c \
 	$(CORE_DIR)/io.c \
-	$(CORE_DIR)/timing.c $(CORE_DIR)/sound.c $(CORE_DIR)/disas.c \
+	$(CORE_DIR)/timing.c $(CORE_DIR)/sound.c \
 	$(CORE_DIR)/terakdisk.c $(CORE_DIR)/synth.c $(CORE_DIR)/emu2149.c \
 	$(CORE_DIR)/main.c $(CORE_DIR)/scr-libretro.c $(CORE_DIR)/scr.c \
 	$(CORE_DIR)/tty-libretro.c $(CORE_DIR)/joystick.c

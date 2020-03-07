@@ -158,7 +158,7 @@ int load_src(register pdp_regs *p, d_word *data);
 
 extern void line_init(void);
 void bk_scr_init(void);
-void boot_init(void);
+int boot_init(void);
 void timer_init(void);
 void printer_init(void);
 void covox_init(void);
@@ -188,7 +188,7 @@ extern int covox_read(c_addr addr, d_word *word);
 extern int covox_write(c_addr, d_word), covox_bwrite(c_addr, d_byte);
 extern int synth_read(c_addr addr, d_word *word), synth_write(c_addr, d_word), synth_bwrite(c_addr, d_byte), synth_next(void);
 extern int bkplip_read(c_addr addr, d_word *word), bkplip_write(c_addr, d_word), bkplip_bwrite(c_addr, d_byte);
-extern int service(d_word);
+extern int service(d_word vector);
 unsigned short *get_vram_line (int bufno, int line);
 void tape_read_start(void);
 void tape_read_finish(void);
@@ -214,7 +214,7 @@ typedef struct _event {
  * Instruction Table for Fast Decode.
  */
 
-typedef int (*_itab_t)();
+typedef int (*_itab_t)(register pdp_regs *p);
 
 
 /*
@@ -550,8 +550,8 @@ extern int cybuf[1024];
 extern int cybufidx;
 void ui_download(void);
 void intr_hand(void);
-d_word platform_joystick_get_state();
-void platform_joystick_init();
+d_word platform_joystick_get_state(void);
+void platform_joystick_init(void);
 
 enum joystick_state {
   JOYSTICK_BUTTON1 = 0x1,
@@ -572,7 +572,8 @@ void platform_disk_init(disk_t *disks);
 
 extern char * tape_prefix;
 
-void load_and_run_bin(void *data, size_t sz);
+void load_and_run_bin(const void *data, size_t sz);
 void *load_rom_file(const char * rompath, size_t *sz, size_t min_sz, size_t max_sz);
+int load_file(FILE *f, int addr);
 
 #endif

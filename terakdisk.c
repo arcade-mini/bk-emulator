@@ -40,7 +40,7 @@ void tdisk_finish() {
 	for (i = 0; i < 4; i++) {
 		if (!tdisks[i].image)
 			continue;
-		munmap(tdisks[i].image, tdisks[i].length);
+		if (tdisks[i].length > 0) free(tdisks[i].image);
 	}	
 }
 

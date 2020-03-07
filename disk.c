@@ -46,7 +46,7 @@ void disk_finish() {
 
 /* The index hole appears for 1 ms every 100 ms,
  */
-int index_flag() {
+static int index_flag() {
 	unsigned msec = ticks / (TICK_RATE/1000);
 	return (msec % 100 == 0);
 }
@@ -78,7 +78,7 @@ FILLER, FILLER, 0, 0, 0, 0, 0, 0, LAST, ENDFLAG
 };
 #define ENDMARKLEN (sizeof(end_marker)/sizeof(*end_marker))
 
-unsigned short
+static unsigned short
 disk_read_word(disk_t * pdt) {
 	unsigned short ret;
 	if (pdt->need_sidetrk) {

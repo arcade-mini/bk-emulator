@@ -35,7 +35,7 @@ d_word * pagemap[4] = { ram[6], ram[1], rom[0], system_rom };
 /*
  * The QBUS memory map.
  */
-static void q_null();
+static void q_null(void);
 int q_err(c_addr, d_word), q_errb(c_addr, d_byte),
  port_read(c_addr, d_word*), port_write(c_addr, d_word), port_bwrite(c_addr, d_byte);
 int secret_read(c_addr, d_word*), secret_write(c_addr, d_word), secret_bwrite(c_addr, d_byte);
@@ -69,23 +69,23 @@ pdp_qmap qmap_bk[] = {
 	{ 0, 0, 0, 0, 0, 0 }
 };
 
-int tcons_read(c_addr a, d_word *d) {
+static int tcons_read(c_addr a, d_word *d) {
 	switch (a & 077) {
 	case 064:
 		*d = 0200;
 		break; // done
 	case 066:
-		fprintf(stderr, "Reading %06o\n", a);
+		fprintf(stderr, "Reading %06lo\n", a);
 		*d = 0;
 		break; // nothing
 	}
 	return OK;
 }
 
-int tcons_write(c_addr a, d_word d) {
+static int tcons_write(c_addr a, d_word d) {
 	switch (a & 077) {
 	case 064:
-		fprintf(stderr, "Writing %06o: %06o\n", a, d);
+		fprintf(stderr, "Writing %06lo: %06o\n", a, d);
 		break;
 	case 066:
 		// fprintf(stderr, "Writing %03o to console port %06o\n", d, a);
@@ -98,7 +98,7 @@ int tcons_write(c_addr a, d_word d) {
 	return OK;
 }
 
-int tcons_writeb(c_addr a, unsigned char d) {
+static int tcons_writeb(c_addr a, unsigned char d) {
         return tcons_write(a, d);
 }
 
@@ -133,9 +133,11 @@ pdp_qmap q_synth = {
 	PORT_REG, PORT_SIZE, synth_init, synth_read, synth_write, synth_bwrite
 };
 
+#ifndef LIBRETRO
 pdp_qmap q_bkplip = {
 	PORT_REG, PORT_SIZE, bkplip_init, bkplip_read, bkplip_write, bkplip_bwrite
 };
+#endif
 
 pdp_qmap q_joystick = {
 	PORT_REG, PORT_SIZE, joystick_init, joystick_read, joystick_write, joystick_bwrite
@@ -148,22 +150,24 @@ void plug_printer() { qmap[0] = q_printer; }
 void plug_mouse() { qmap[0] = q_mouse; }
 void plug_covox() { qmap[0] = q_covox; }
 void plug_synth() { qmap[0] = q_synth; }
+#ifndef LIBRETRO
 void plug_bkplip() { qmap[0] = q_bkplip; }
+#endif
 
 /* When nothing is connected to the port */
 int port_read(c_addr a, d_word *d) {
 	*d = 0;		/* pulldown */
-	fprintf(stderr, "Reading port %06o\n", a);
+	fprintf(stderr, "Reading port %06lo\n", a);
 	return OK;
 }
 
 int port_write(c_addr a, d_word d) {
-	fprintf(stderr, "Writing %06o to port %06o\n", d, a);
+	fprintf(stderr, "Writing %06o to port %06lo\n", d, a);
 	return OK;	/* goes nowhere */
 }
 
 int port_bwrite(c_addr a, d_byte d) {
-	fprintf(stderr, "Writing %03o to port %06o\n", d, a);
+	fprintf(stderr, "Writing %03o to port %06lo\n", d, a);
 	return OK;	/* goes nowhere */
 }
 
@@ -189,12 +193,12 @@ d_word *word;
 }
 
 int secret_write(c_addr a, d_word d) {
-	fprintf(stderr, "Writing %o to %o\n", d, a);
+	fprintf(stderr, "Writing %o to %lo\n", d, a);
 	return OK;	/* goes nowhere */
 }
 
 int secret_bwrite(c_addr a, d_byte d) {
-	fprintf(stderr, "Writing %o to %o\n", d, a);
+	fprintf(stderr, "Writing %o to %lo\n", d, a);
 	return OK;	/* goes nowhere */
 }
 
@@ -224,7 +228,7 @@ lc_word(c_addr addr, d_word *word)
 			return (qmap[i].rfunc)( addr, word );
 		}
 	}
-	fprintf(stderr, _("Illegal read address %06o:"), addr);
+	fprintf(stderr, _("Illegal read address %06lo:"), addr);
 	return BUS_ERROR;
 }
 
@@ -343,7 +347,7 @@ int sc_word(c_addr addr, d_word word) {
 			return (qmap[i].wfunc)( addr, word );
 		}
 	}
-	fprintf(stderr, _("@%06o Illegal write address %06o:"), pdp.regs[PC], addr);
+	fprintf(stderr, _("@%06o Illegal write address %06lo:"), pdp.regs[PC], addr);
 	return BUS_ERROR;
 }
 
@@ -494,12 +498,12 @@ static void q_null()
 
 int q_err(c_addr x, d_word y)
 {
-	fprintf(stderr, _("Writing to ROM addr %06o:"), x);
+	fprintf(stderr, _("Writing to ROM addr %06lo:"), x);
 	return BUS_ERROR;
 }
 int q_errb(c_addr x, d_byte y)
 {
-	fprintf(stderr, _("Writing byte to ROM addr %06o:"), x);
+	fprintf(stderr, _("Writing byte to ROM addr %06lo:"), x);
 	return BUS_ERROR;
 }
 

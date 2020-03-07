@@ -52,13 +52,13 @@ const _itab_t sitab1[64] = {
 	scc, scc, scc, scc, scc, scc, scc, scc
 };
 
-int dositab0( p )
+static int dositab0( p )
 register pdp_regs *p;
 {
 	return sitab0[p->ir&077]( p );
 }
 
-int dositab1( p )
+static int dositab1( p )
 register pdp_regs *p;
 {
 	return sitab1[p->ir&077]( p );

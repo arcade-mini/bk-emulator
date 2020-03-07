@@ -12,6 +12,7 @@
 
 #include "defines.h"
 #include "intl.h"
+#include "ops.h"
 
 
 /* Allows up to 32 different HW interrupts,
@@ -67,7 +68,7 @@ void ev_register(unsigned priority, int (*handler)(d_word),
 void ev_fire( int priority )
 {
 	int x;
-	unsigned long mask;
+	unsigned long mask = 0;
 	switch (priority) {
 		case 0: mask = ~0; break;
 		case 1: mask = ~0; break;
@@ -106,8 +107,7 @@ void ev_fire( int priority )
  */
 
 int
-service( vector )
-d_word vector;
+service( d_word vector )
 {
 	register pdp_regs *p = &pdp;
 	int result;
@@ -115,10 +115,8 @@ d_word vector;
 	d_word oldpc;
 	d_word newpsw;
 	d_word newpc;
-	d_word oldmode;
 
 	last_branch = p->regs[PC];
-	oldmode = ( p->psw & 0140000 ) >> 14;
 
 	oldpsw = p->psw;
 	oldpc = p->regs[PC];

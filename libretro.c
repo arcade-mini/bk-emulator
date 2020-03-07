@@ -64,7 +64,7 @@ unsigned retro_api_version(void)
    return RETRO_API_VERSION;
 }
 
-void
+static void
 set_input_descs(void)
 {
 	   	static struct retro_input_descriptor desc[] = {
@@ -369,8 +369,9 @@ static int game_init_pixelformat(void)
 bool retro_load_game(const struct retro_game_info *info)
 {
 	if (info && info->data) {
-                game_data = malloc(info->size);
-                memcpy (game_data, info->data, info->size);
+		void *gd = malloc(info->size);
+                game_data = gd;
+                memcpy (gd, info->data, info->size);
                 game_size = info->size;
 		hasgame = 1;
 	}
@@ -390,9 +391,13 @@ bool retro_load_game(const struct retro_game_info *info)
 
 	/* Set ROM configuration */
 
-	if (environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &dir) && dir)
+	if (environ_cb(RETRO_ENVIRONMENT_GET_SYSTEM_DIRECTORY, &dir) && dir && dir[0])
 	{
-		romdir = strdup(dir);
+		char *cd = malloc (strlen(dir) + 20);
+		assert(cd != NULL);
+		strcpy(cd, dir);
+		strcat(cd, "/bk");
+		romdir = cd;
 	}
 
 	update_variables(true);
@@ -434,7 +439,8 @@ bool retro_load_game(const struct retro_game_info *info)
 	sim_init();		/* ...the simulated cpu */
 	mem_init();		/* ...main memory */
 	bk_scr_init();		/* video display */
-	boot_init();		/* ROM blocks */
+	if (!boot_init())
+	  return false;		/* ROM blocks */
 	q_reset();             /* ...any devices */
 
 	mouseflag = 0;
@@ -555,8 +561,6 @@ void platform_disk_init(disk_t *disks) {
 
 void *load_rom_file(const char * rompath, size_t *sz, size_t min_sz, size_t max_sz)
 {
-	FILE * romf;
-
 	char *path = malloc(strlen(romdir)+strlen(rompath)+2);
 
 	if (!path) {
@@ -571,9 +575,7 @@ void *load_rom_file(const char * rompath, size_t *sz, size_t min_sz, size_t max_
 	else
 		strcpy(path, rompath);
 
-	log_cb(RETRO_LOG_INFO, "Loading %s...", path);
-
-	char *ret = NULL;
+	log_cb(RETRO_LOG_INFO, "Loading %s...\n", path);
 
 	if (vfs_interface)
 	{

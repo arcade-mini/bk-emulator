@@ -35,13 +35,16 @@
  * Used for BK-0010 style ROM - stores into the mapped memory.
  */
 
-void load_rom(unsigned start, const char * rompath, unsigned min_size, unsigned max_size) {
+static int load_rom(unsigned start, const char * rompath, unsigned min_size, unsigned max_size) {
 	int i;
 
-	if (!rompath || !*rompath) return;
+	if (!rompath || !*rompath) return 1;
 
 	size_t sz;
 	unsigned char *romf = load_rom_file (rompath, &sz, min_size, max_size);
+
+	if (romf == NULL)
+		return 0;
 	
 	unsigned long saved_ram_map = pdp_ram_map;
 	pdp_ram_map = ~0l;
@@ -51,18 +54,21 @@ void load_rom(unsigned start, const char * rompath, unsigned min_size, unsigned 
 	free(romf);
         fprintf(stderr, _("Done.\n"));
 	pdp_ram_map = saved_ram_map;
+
+	return 1;
 }
 
 /*
  * Loads BK-0011 ROM into the givem ROM block from a given offset.
  */
-void load_rom11(d_word * rombuf, int byte_off, const char * rompath, int byte_size) {
-	char * path;
+static int load_rom11(d_word * rombuf, int byte_off, const char * rompath, int byte_size) {
 	int i;
 
-	if (!rompath || !*rompath) return;
+	if (!rompath || !*rompath) return 1;
 	size_t sz;
 	unsigned char *romf = load_rom_file (rompath, &sz, byte_size, byte_size);
+	if (romf == NULL)
+		return 0;
 
 	rombuf += byte_off/2;
 	for (i = 0; i < byte_size/2; i++, rombuf++) {
@@ -70,36 +76,41 @@ void load_rom11(d_word * rombuf, int byte_off, const char * rompath, int byte_si
 	}
 	free(romf);
         fprintf(stderr, _("Done.\n"));
+
+	return 1;
 }
 
-void
+int
 boot_init()
 {
+	int ok = 1;
 	static unsigned char boot_done = 0;
-	if (boot_done) return;
+	if (boot_done) return 1;
 
 	boot_done = 1;
 
 	if (terak) {
 		/* So far we only have Terak boot ROM */
-		load_rom(0173000, "TERAK.ROM", 128, 128);
-		return;
+		ok = ok && load_rom(0173000, "TERAK.ROM", 128, 128);
+		return ok;
 	}
 	if (bkmodel != 0) {
-		load_rom11(system_rom, 0, bos11rom, 8192);
-		load_rom11(system_rom, 8192, diskrom, 4096);
-		load_rom11(rom[0], 0, basic11arom, 16384);
-		load_rom11(rom[1], 0, basic11brom, 8192);
-		load_rom11(rom[1], 8192, bos11extrom, 8192);
-		return;
+		ok = ok && load_rom11(system_rom, 0, bos11rom, 8192);
+		ok = ok && load_rom11(system_rom, 8192, diskrom, 4096);
+		ok = ok && load_rom11(rom[0], 0, basic11arom, 16384);
+		ok = ok && load_rom11(rom[1], 0, basic11brom, 8192);
+		ok = ok && load_rom11(rom[1], 8192, bos11extrom, 8192);
+		return ok;
 	}
 
 	/* Monitor must be exactly 8k */
-	load_rom(0100000, rompath10, 8192, 8192);
+	ok = ok && load_rom(0100000, rompath10, 8192, 8192);
 
 	/* Basic or Focal ROM may be 24448 to 24576 bytes */
-	load_rom(0120000, rompath12, 24448, 24576);
+	ok = ok && load_rom(0120000, rompath12, 24448, 24576);
 
 	/* Disk controller BIOS is exactly 4k */
-	load_rom(0160000, rompath16, 4096, 4096);
+	ok = ok && load_rom(0160000, rompath16, 4096, 4096);
+
+	return ok;
 }

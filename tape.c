@@ -134,7 +134,7 @@ static char unix_filename[17];
  * Returns the raw 16-byte file name in bk_filename,
  * and the name with trimmed trailing spaces in unix_filename.
  */
-void
+static void
 get_emt36_filename() {
 	int i;
 	d_word base;
@@ -205,7 +205,7 @@ void fake_read_strobe() {
 	static unsigned char curbyte;
 	static unsigned curlen;
 	static unsigned curaddr;
-	int bit;
+	int bit = 0;
 	if (fake_state == Idle && !tape_read_file) {
 		/* First time here, find which file to open */
 		get_emt36_filename();
